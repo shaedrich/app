@@ -34,6 +34,7 @@
     "data-values/geo": "~1.0",
     "mediawiki/maps": "3.5.1",
     "mediawiki/semantic-media-wiki": "2.4.2.6",
-    "ooyala/v2-api": "^2.0"
+    "ooyala/v2-api": "^2.0",
+    "php-amqplib/php-amqplib": "^2.6"
   }
 }

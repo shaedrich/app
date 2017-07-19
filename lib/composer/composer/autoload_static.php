@@ -61,6 +61,7 @@ class ComposerStaticInitb367f9b4bf4d43e0d5ea402c134db26b
         'P' => 
         array (
             'PhpDocReader\\' => 13,
+            'PhpAmqpLib\\' => 11,
             'ParserHooks\\' => 12,
             'ParamProcessor\\' => 15,
         ),
@@ -174,6 +175,10 @@ class ComposerStaticInitb367f9b4bf4d43e0d5ea402c134db26b
         'PhpDocReader\\' => 
         array (
             0 => __DIR__ . '/..' . '/php-di/phpdoc-reader/src/PhpDocReader',
+        ),
+        'PhpAmqpLib\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/php-amqplib/php-amqplib/PhpAmqpLib',
         ),
         'ParserHooks\\' => 
         array (
