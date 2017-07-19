@@ -21,7 +21,8 @@ class AsyncCeleryTask extends AsyncTaskList
 {
 
 	/**
-	 * @var task arguments corresponding to *args in python task.  **kwargs are not supported by AsyncTaskList
+	 * @var array task arguments corresponding to *args in python task.
+	 * **kwargs are not supported by AsyncTaskList
 	 */
 	private $args;
 
@@ -31,15 +32,17 @@ class AsyncCeleryTask extends AsyncTaskList
 	}
 
 	// Uniquely identifies our task
-	protected function initializeWorkId() {
+	protected function initializeWorkId(): AsyncTaskList {
 		$this->workId = [
 			"task" => $this->taskType,
 			"args" => $this->args
 		 ];
+		
+		return $this;
 	}
 
 	// return our name/value pairs of arguments wrapped in an extra array ("because")
-	protected function payloadArgs() {
+	protected function payloadArgs(): array {
 		return $this->args;
 	}
 

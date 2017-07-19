@@ -236,9 +236,9 @@ class AsyncTaskList {
 	 * If method and runner fields are not set here,
 	 * celeryd will use the defaults from /etc/celeryd/celeryd.conf ([mediawiki] section)
 	 *
-	 * @return array
+	 * @return array|null
 	 */
-	protected function getExecutor(): array {
+	protected function getExecutor() {
 		global $IP, $wgWikiaEnvironment, $wgDevDomain;
 		$executor = [
 			'app' => self::EXECUTOR_APP_NAME,
