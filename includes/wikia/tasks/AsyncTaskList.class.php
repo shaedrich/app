@@ -10,7 +10,9 @@
 namespace Wikia\Tasks;
 
 use PhpAmqpLib\Channel\AMQPChannel;
-use PhpAmqpLib\Connection\AMQPConnection;
+use PhpAmqpLib\Connection\AbstractConnection;
+use PhpAmqpLib\Connection\AMQPStreamConnection;
+use PhpAmqpLib\Exception\AMQPTimeoutException;
 use PhpAmqpLib\Message\AMQPMessage;
 use PhpAmqpLib\Exception\AMQPRuntimeException;
 use PhpAmqpLib\Exception\AMQPExceptionInterface;
@@ -31,13 +33,13 @@ class AsyncTaskList {
 	/** which config to grab when figuring out the executor (on the job queue side) */
 	const EXECUTOR_APP_NAME = 'mediawiki';
 
-	/** @var AMQPConnection connection to message broker */
+	/** @var AbstractConnection connection to message broker */
 	protected $connection;
 
 	/** @var Queue the queue this task list will go into */
 	protected $queue;
 
-	/** @var array list of BaseTask classes needed to execute the task list */
+	/** @var BaseTask[] list of BaseTask classes needed to execute the task list */
 	protected $classes = [];
 
 	/** @var array list of calls to make */
@@ -70,7 +72,7 @@ class AsyncTaskList {
 	 *
 	 * @return $this
 	 */
-	public function prioritize() {
+	public function prioritize(): AsyncTaskList {
 		return $this->setPriority( PriorityQueue::NAME );
 	}
 
@@ -80,7 +82,7 @@ class AsyncTaskList {
 	 * @param string $queue which queue to add this task list to
 	 * @return $this
 	 */
-	public function setPriority( $queue ) {
+	public function setPriority( $queue ): AsyncTaskList {
 		switch ( $queue ) {
 			case PriorityQueue::NAME:
 				$queue = new PriorityQueue();
@@ -112,7 +114,7 @@ class AsyncTaskList {
 	 * @param array $taskCall result from calling BaseTask->call()
 	 * @return $this
 	 */
-	public function add( $taskCall ) {
+	public function add( array $taskCall ): AsyncTaskList {
 		list( $task, $callIndex ) = $taskCall;
 		$classIndex = array_search( $task, $this->classes, true );
 
@@ -132,7 +134,7 @@ class AsyncTaskList {
 	 * @param int $wikiId
 	 * @return $this
 	 */
-	public function wikiId( $wikiId ) {
+	public function wikiId( int $wikiId ): AsyncTaskList {
 		$this->wikiId = $wikiId;
 
 		return $this;
@@ -144,7 +146,7 @@ class AsyncTaskList {
 	 * @param int|string|\User $createdBy the id, name, or user object
 	 * @return $this
 	 */
-	public function createdBy( $createdBy ) {
+	public function createdBy( $createdBy ): AsyncTaskList {
 		if ( is_int( $createdBy ) ) {
 			$user = \User::newFromId( $createdBy );
 			$user->load();
@@ -170,7 +172,7 @@ class AsyncTaskList {
 	 * @return $this
 	 * @link http://php.net/strtotime
 	 */
-	public function delay( $time ) {
+	public function delay( string $time ): AsyncTaskList {
 		$this->delay = $time;
 
 		return $this;
@@ -181,7 +183,7 @@ class AsyncTaskList {
 	 *
 	 * @return $this
 	 */
-	public function dupCheck() {
+	public function dupCheck(): AsyncTaskList {
 		$this->dupCheck = true;
 
 		return $this;
@@ -192,7 +194,7 @@ class AsyncTaskList {
 	 * @param string $type
 	 * @return $this
 	 */
-	public function taskType( $type ) {
+	public function taskType( $type ): AsyncTaskList {
 		$this->taskType = $type;
 		return $this;
 	}
@@ -201,7 +203,7 @@ class AsyncTaskList {
 	 * Initializes the data we're using to identify a set of tasks so we can reuse the runner without leaky state
 	 * @return $this
 	 */
-	protected function initializeWorkId() {
+	protected function initializeWorkId(): AsyncTaskList {
 		$this->workId = ['tasks' => [], 'wikiId' => $this->wikiId];
 		return $this;
 	}
@@ -210,21 +212,20 @@ class AsyncTaskList {
 	 * Returns the "args" value of the payload. Required in base class to valuate work id
 	 * @return array
 	 */
-	protected function payloadArgs() {
+	protected function payloadArgs(): array {
 		$taskList = [];
 		foreach ( $this->classes as $task ) {
-			/** @var BaseTask $task */
 			$serialized = $task->serialize();
 			$taskList [] = $serialized;
 			$this->workId['tasks'] [] = $serialized;
 		}
 		return [[
-			'wiki_id' => $this->wikiId,
-			'call_order' => $this->calls,
-			'task_list' => $taskList,
-			'created_by' => $this->createdBy,
-			'created_at' => microtime( true ),
-			'trace_env' => \Wikia\Tracer\WikiaTracer::instance()->getEnvVariables(),
+					'wiki_id' => $this->wikiId,
+					'call_order' => $this->calls,
+					'task_list' => $taskList,
+					'created_by' => $this->createdBy,
+					'created_at' => microtime( true ),
+					'trace_env' => WikiaTracer::instance()->getEnvVariables(),
 		]];
 	}
 
@@ -237,7 +238,7 @@ class AsyncTaskList {
 	 *
 	 * @return array
 	 */
-	protected function getExecutor() {
+	protected function getExecutor(): array {
 		global $IP, $wgWikiaEnvironment, $wgDevDomain;
 		$executor = [
 			'app' => self::EXECUTOR_APP_NAME,
@@ -364,10 +365,10 @@ class AsyncTaskList {
 	}
 
 	/**
-	 * @return AMQPConnection connection to message broker
+	 * @return AbstractConnection connection to message broker
 	 * @throws AMQPExceptionInterface
 	 */
-	protected function connection() {
+	protected function connection(): AbstractConnection {
 		if ( $this->connection == null ) {
 			$this->connection = self::getConnection();
 		}
@@ -380,18 +381,18 @@ class AsyncTaskList {
 	 *
 	 * Throws AMQPRuntimeException when task broker is disabled in a cureent environment (PLATFORM-1740)
 	 *
-	 * @return AMQPConnection connection to message broker
+	 * @return AbstractConnection connection to message broker
 	 * @throws AMQPRuntimeException
 	 * @throws AMQPTimeoutException
 	 */
-	protected static function getConnection() {
+	protected static function getConnection(): AbstractConnection {
 		global $wgTaskBroker;
 
 		if ( empty( $wgTaskBroker ) ) {
 			throw new AMQPRuntimeException( 'Task broker is disabled' );
 		}
 
-		return new AMQPConnection( $wgTaskBroker['host'], $wgTaskBroker['port'], $wgTaskBroker['user'], $wgTaskBroker['pass'] );
+		return new AMQPStreamConnection( $wgTaskBroker['host'], $wgTaskBroker['port'], $wgTaskBroker['user'], $wgTaskBroker['pass'] );
 	}
 
 	/**
@@ -412,13 +413,13 @@ class AsyncTaskList {
 	/**
 	 * send a group of AsyncTaskList objects to the broker
 	 *
-	 * @param array $taskLists AsyncTaskList objects to insert into the queue
-	 * @param string $priority which queue to add this task list to
+	 * @param AsyncTaskList[] $taskLists AsyncTaskList objects to insert into the queue
+	 * @param string|null $priority which queue to add this task list to
 	 * @return array list of task ids
-	 * @throws \PhpAmqpLib\Exception\AMQPRuntimeException
-	 * @throws \PhpAmqpLib\Exception\AMQPTimeoutException
+	 * @throws AMQPRuntimeException
+	 * @throws AMQPTimeoutException
 	 */
-	public static function batch( $taskLists, $priority = null ) {
+	public static function batch( array $taskLists, $priority = null ) {
 		$logError = function( \Exception $e ) {
 			WikiaLogger::instance()->error( 'AsyncTaskList::batch', [
 				'exception' => $e,
@@ -439,7 +440,6 @@ class AsyncTaskList {
 		$ids = [];
 
 		foreach ( $taskLists as $task ) {
-			/** @var AsyncTaskList $task */
 			$ids [] = $task->queue( $channel, $priority );
 		}
 
