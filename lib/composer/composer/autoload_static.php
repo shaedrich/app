@@ -296,10 +296,6 @@ class ComposerStaticInitb367f9b4bf4d43e0d5ea402c134db26b
             array (
                 0 => __DIR__ . '/..' . '/phpspec/prophecy/src',
             ),
-            'PhpAmqpLib' => 
-            array (
-                0 => __DIR__ . '/..' . '/videlalvaro/php-amqplib',
-            ),
         ),
         'D' => 
         array (
