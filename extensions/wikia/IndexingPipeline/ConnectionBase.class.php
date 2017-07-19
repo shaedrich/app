@@ -2,9 +2,12 @@
 
 namespace Wikia\IndexingPipeline;
 
-use PhpAmqpLib\Connection\AMQPConnection;
+use PhpAmqpLib\Channel\AMQPChannel;
+use PhpAmqpLib\Connection\AbstractConnection;
+use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Exception\AMQPExceptionInterface;
 use PhpAmqpLib\Message\AMQPMessage;
+use Wikia\Logger\WikiaLogger;
 use Wikia\Tracer\WikiaTracer;
 
 class ConnectionBase {
@@ -19,9 +22,9 @@ class ConnectionBase {
 	protected $exchange;
 	protected $deadExchange;
 
-	/** @var  AMQPConnection Holds worker publish connection */
+	/** @var  AbstractConnection Holds worker publish connection */
 	protected $connection;
-	/** @var  \PhpAmqpLib\Channel\AMQPChannel Holds anon channel for publishing */
+	/** @var  AMQPChannel Holds anon channel for publishing */
 	protected $channel;
 
 	public function __construct( $wgConnectionCredentials ) {
@@ -53,15 +56,15 @@ class ConnectionBase {
 				$routingKey
 			);
 		} catch ( AMQPExceptionInterface $e ) {
-			\Wikia\Logger\WikiaLogger::instance()->error( __METHOD__, [
+			WikiaLogger::instance()->error( __METHOD__, [
 				'exception' => $e,
 				'routing_key' => $routingKey,
 			] );
 		}
 	}
 
-	protected function getChannel() {
-		if ( !isset( $this->channel ) || !$this->channel->is_open ) {
+	protected function getChannel(): AMQPChannel {
+		if ( !isset( $this->channel ) ) {
 			$pubConn = $this->getConnection();
 			$this->channel = $pubConn->channel();
 		}
@@ -70,11 +73,10 @@ class ConnectionBase {
 	}
 
 	protected function createConnection() {
-		return new AMQPConnection( $this->host, $this->port, $this->user, $this->pass, $this->vhost );
+		return new AMQPStreamConnection( $this->host, $this->port, $this->user, $this->pass, $this->vhost );
 	}
 
-	/** @return AMQPConnection */
-	protected function getConnection() {
+	protected function getConnection(): AbstractConnection {
 		if ( !isset( $this->connection ) ) {
 			$this->connection = $this->createConnection();
 		}
