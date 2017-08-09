@@ -60,52 +60,10 @@ class SpecialCategoryIntersection extends SpecialPage {
 
 		$wgOut->setPagetitle( wfMsg('categoryintersection') );
 
-		// Just splurt some CSS onto the page for now (TODO: Make this an external file.. do it in a way that works for both AssetsManager and for MediaWiki in general)
-		$wgOut->addHTML("
-			<style type='text/css'>
-				h3{
-					font-weight:bold;
-				}
-				table{
-					width:100%;
-				}
-				td{
-					vertical-align:top;
-					width: 512px; /* why does 50% not work? (causes the API query line to take massive width in Chrome) */
-					word-wrap:break-word; /* so that the API query doesn't make the cell grow in Chrome */
-				}
-				td.form{
-					padding: 20px 20px;
-					background-color:#efefef;
-					width:475px;
-				}
-				td.form input[type=text]{
-					width:95%;
-					height:30px;
-					font-size:13px;
-					padding-left:5px;
-				}
-				td.results{
-					opacity:0.8;
-					filter:alpha(opacity=80); /* For IE8 and earlier */
-					padding: 20px 20px;
-					background-color:#efefef;
-					font-size:13px;
-				}
-				.autoCompleteWrapper{
-					position: relative;
-				}
-				div.autoCompleteWrapper div{
-					background-color:#000;
-					background-color:#fff; /* Do we need to use an Oasis theme mixin? */
-				}
-				.autocomplete{
-					border:1px solid;
-					padding:3px;
-				}
-			</style>
-		");
+		//TODO: Load CSS
+		$wgOut->addHTML();
 
+		//TODO: Move to template
 		// Show the header
 		$wgOut->addHTML( "<h2>" . wfMsg('categoryintersection-header-title') . "</h2>" );
 		$docLink = "<a href='".$this->getDocumentationUrl()."'>". wfMsg('categoryintersection-docs-linktext') ."</a>";
@@ -139,6 +97,7 @@ class SpecialCategoryIntersection extends SpecialPage {
 	 * @param out - OutputPage to add HTML to.
 	 */
 	private function showForm($out){
+		//TODO: Move to template
 		global $wgRequest;
 		wfProfileIn( __METHOD__ );
 
@@ -183,6 +142,7 @@ class SpecialCategoryIntersection extends SpecialPage {
 	 * is a form submission
 	 */
 	private function getHtmlForCategoryBox($num){
+		//TODO: Move to template
 		global $wgRequest;
 		$formName = self::$CAT_PREFIX . "$num";
 		$value = $wgRequest->getVal($formName);
@@ -198,6 +158,7 @@ class SpecialCategoryIntersection extends SpecialPage {
 	 * @param out - OutputPage to add HTML to.
 	 */
 	private function showResults($out){
+		//TODO: Move to template
 		wfProfileIn( __METHOD__ );
 		global $wgRequest, $wgServer, $wgScriptPath;
 
@@ -280,6 +241,7 @@ class SpecialCategoryIntersection extends SpecialPage {
 	 * @param out - OutputPage to add HTML to.
 	 */
 	private function showFooter($out){
+		//TODO: Move to template
 		wfProfileIn( __METHOD__ );
 		global $wgServer, $wgScriptPath;
 
