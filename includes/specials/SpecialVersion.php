@@ -276,6 +276,25 @@ class SpecialVersion extends SpecialPage {
 		$types = self::getExtensionTypes();
 		return isset( $types[$type] ) ? $types[$type] : $types['other'];
 	}
+	
+	/**
+	* Generate table of contents
+	*
+	* return String: Wikitext
+	*/
+	function getTOC() {
+		$extensionTypes = self::getExtensionTypes();
+		$out = '<nav>'.
+			'<h2>TOC</h2>'.
+			'<ol>';
+		
+			foreach($extensionTypes as $type => $name) {
+				$out .= '<li><a href="#sv-'. $name .'">'. $name .'</a></a>';
+			}
+		
+			$out .= '</ol>'.
+		'</nav>';
+	}
 
 	/**
 	 * Generate wikitext showing extensions name, URL, author and description.
