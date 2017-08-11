@@ -7,10 +7,10 @@ use Email\EmailController;
  * Provides the special page for single point unsubscribe.
  * Access is done via links provided in emails to user ONLY.
  * URL will contain 3 query param:
- * *email: the email of the user we are unsub'ing
- * *timestamp: unix timestamp of when the link was generated.
+ * @param email: the email of the user we are unsub'ing
+ * @param timestamp: unix timestamp of when the link was generated.
  *  -links must be clicked within 7 days of being generated.
- * *token: unique hash that validates the email and timestamp
+ * @param token: unique hash that validates the email and timestamp
  *
  * @file
  */
