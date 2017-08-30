@@ -89,6 +89,18 @@ class SpecialGadgets extends SpecialPage {
 			 * @var $gadget Gadget
 			 */
 			foreach ( $entries as $gadget ) {
+				$gadget_title = Title::makeTitle( NS_MEDIAWIKI, $gadget->getName());
+				if(in_array($title->mInterwiki, array('w', 'wikia', 'wikicities'))) {
+		 			$aLinkParts = explode(':', $title->getText());
+		 			if($aLinkParts[0] == 'c') {				
+		 				$iCityId = self::isWikiExists($aLinkParts[1]);
+			 			$aLinkParts = explode(':', $title->getFullText());
+			 			if($aLinkParts[1] == 'c') {
+			 				$iCityId = self::isWikiExists($aLinkParts[2]);
+			 			}
+		 			}
+				}
+				$interwiki == '';
 				$t = Title::makeTitleSafe( NS_MEDIAWIKI, "Gadget-{$gadget->getName()}$lang" );
 
 				if ( !$t ) {
